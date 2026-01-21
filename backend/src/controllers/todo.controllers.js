@@ -29,10 +29,20 @@ exports.toggleTodo = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
 
+    // First, fetch the current todo to get its current completed status
+    const currentTodo = await prisma.todo.findUnique({
+      where: { id },
+    });
+
+    if (!currentTodo) {
+      return res.status(404).json({ success: false, error: "Todo not found" });
+    }
+
+    // Then update with the opposite value
     const todo = await prisma.todo.update({
       where: { id },
       data: {
-        completed: { not: true },
+        completed: !currentTodo.completed,
       },
     });
 
