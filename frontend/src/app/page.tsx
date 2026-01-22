@@ -14,6 +14,9 @@ import UserProfileLink from "@/components/UserProfileLink";
 export default function Home() {
   const { todoList, addTodo, deleteTodoById, toggleTodoById } = useContext(TodoContext);
   const form = useTodoForm();
+  
+  // Safety check: ensure todoList is always an array
+  const safeTodoList = Array.isArray(todoList) ? todoList : [];
 
   const handleAddTodo = () => {
     const newTodo = form.createTodo();
@@ -59,7 +62,7 @@ export default function Home() {
               setDescription={form.setDescription}
               dueDate={form.dueDate}
               setDueDate={form.setDueDate}
-              todos={todoList}
+              todos={safeTodoList}
               onDelete={deleteTodoById}
               onToggle={toggleTodoById}
             />

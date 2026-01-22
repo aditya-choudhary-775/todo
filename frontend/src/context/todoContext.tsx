@@ -1,7 +1,5 @@
 "use client";
 import { createTodo, deleteTodo, getTodos, toggleTodo } from "@/lib/todos.api";
-import { error } from "console";
-import { number } from "motion";
 import React, { createContext, useEffect, useState } from "react";
 
 export type Todo = {
@@ -42,11 +40,16 @@ const TodoContextProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getTodos();
-      setTodoList(data.todos);
-      getStats(data.todos);
+      const response = await getTodos();
+      // Defensive check: ensure data exists and has data property
+      const todos = response && response.data && Array.isArray(response.data) ? response.data : [];
+      setTodoList(todos);
+      getStats(todos);
     } catch (err: any) {
       setError(err.message);
+      // On error, ensure todoList is still an array (not undefined)
+      setTodoList([]);
+      getStats([]);
     } finally {
       setLoading(false);
     }

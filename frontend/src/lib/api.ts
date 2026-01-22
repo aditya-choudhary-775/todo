@@ -8,28 +8,44 @@ export async function apiFetch<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const res = await fetch(`${API_BASE_URL}${endpoint}`, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    ...options,
-  });
+  try {
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      ...options,
+    });
 
-  if (!res.ok) {
-    const errorBody = await res.json();
-    throw new Error(errorBody.error || "Something went wrong");
+    if (!res.ok) {
+      let errorMessage = "Something went wrong";
+      try {
+        const errorBody = await res.json();
+        errorMessage = errorBody.error || errorMessage;
+      } catch {
+        // If response is not JSON, use status text
+        errorMessage = res.statusText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
+
+    // DELETE endpoints often return 204 No Content
+    if (res.status === 204) {
+      return undefined as unknown as T;
+    }
+
+    // Some endpoints may return an empty body even with 200/201
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      return undefined as unknown as T;
+    }
+
+    const json = await res.json();
+    return json;
+  } catch (error) {
+    // Re-throw if it's already an Error, otherwise wrap it
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Network error or invalid response");
   }
-
-  // DELETE endpoints often return 204 No Content
-  if (res.status === 204) {
-    return undefined as unknown as T;
-  }
-
-  // Some endpoints may return an empty body even with 200/201
-  const contentType = res.headers.get("content-type") || "";
-  if (!contentType.includes("application/json")) {
-    return undefined as unknown as T;
-  }
-
-  return res.json();
 };

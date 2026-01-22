@@ -2,15 +2,20 @@ import { apiFetch } from "./api";
 
 export type Todo = {
   id: number;
-  title: string,
+  title: string;
   description: string;
   completed: boolean;
   dueDate: string | null;
   createdAt: string;
 };
 
+type ApiResponse<T> = {
+  success: boolean;
+  data: T;
+};
+
 export async function getTodos() {
-  return apiFetch<{ todos: Todo[] }>("/todos");
+  return apiFetch<ApiResponse<Todo[]>>("/todos");
 };
 
 export async function createTodo(data: {
@@ -18,25 +23,25 @@ export async function createTodo(data: {
   description?: string;
   dueDate?: string | null;
 }) {
-  return apiFetch<{ todo: Todo }>("/todos", {
+  return apiFetch<ApiResponse<Todo>>("/todos", {
     method: "POST",
     body: JSON.stringify(data),
   });
 };
 
 export async function updateTodo(id: number, data: {
-  title?: string,
-  description?: string,
-  dueDate?: string | null,
+  title?: string;
+  description?: string;
+  dueDate?: string | null;
 }) {
-  return apiFetch<{ todo: Todo }>(`/todos/${id}`, {
+  return apiFetch<ApiResponse<Todo>>(`/todos/${id}`, {
     method: "PUT",
     body: JSON.stringify(data),
   });
 };
 
 export async function toggleTodo(id: number) {
-  return apiFetch<{ todo: Todo }>(`/todos/${id}/toggle`, {
+  return apiFetch<ApiResponse<Todo>>(`/todos/${id}/toggle`, {
     method: "PATCH",
   });
 };
