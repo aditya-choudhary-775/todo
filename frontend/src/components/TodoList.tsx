@@ -35,7 +35,7 @@ const TodoList = ({
   const safeTodos = Array.isArray(todos) ? todos : [];
 
   return (
-    <div className="no-scrollbar flex w-full flex-1 flex-col gap-2 overflow-y-scroll rounded-2xl border border-white/15 p-3 shadow-[inset_0px_0px_50px_theme(colors.cyan-900)]">
+    <div className="no-scrollbar flex w-full flex-1 flex-col gap-2 overflow-y-scroll rounded-2xl border border-white/15 p-3 shadow-[inset_0px_0px_50px_theme(colors.cyan.900)]">
       <AnimatePresence>
         {openDueDate && (
           <DueDatePicker

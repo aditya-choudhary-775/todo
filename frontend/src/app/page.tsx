@@ -10,11 +10,13 @@ import TodoInput from "@/components/TodoInput";
 import TodoList from "@/components/TodoList";
 import TodoSummary from "@/components/TodoSummary";
 import UserProfileLink from "@/components/UserProfileLink";
+import useRequireAuth from "@/utils/requireAuth";
 
 export default function Home() {
-  const { todoList, addTodo, deleteTodoById, toggleTodoById } = useContext(TodoContext);
+  useRequireAuth();
+  const { todoList, addTodo, deleteTodoById, toggleTodoById, name, email } = useContext(TodoContext);
   const form = useTodoForm();
-  
+
   // Safety check: ensure todoList is always an array
   const safeTodoList = Array.isArray(todoList) ? todoList : [];
 
@@ -34,7 +36,13 @@ export default function Home() {
           "shadow-[inset_0px_0px_10px_theme(colors.neutral.400),0px_0px_50px_theme(colors.cyan.300)]",
         )}
       >
-        <UserProfileLink />
+        <div className="absolute top-4 right-4 flex flex-col items-end gap-3 justify-center">
+          <UserProfileLink />
+          <div className={cn("shadow-[inset_0px_0px_30px_theme(colors.green.900)]", "py-3 px-5 rounded-xl border border-white/15 flex flex-col justify-center gap-1 text-xs")}>
+            <span className="text-green-700 font-bold tracking-wider">{name.split(" ")[0]}</span>
+            <span className="text-green-700">{email}</span>
+          </div>
+        </div>
 
         <LayoutGroup>
           <div className="flex h-full w-[75%] flex-col items-center justify-between gap-4">

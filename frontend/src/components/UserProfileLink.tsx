@@ -1,13 +1,18 @@
 import Link from "next/link";
-import { IconUser } from "@tabler/icons-react";
+import { IconPower, IconUser } from "@tabler/icons-react";
+import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
-const UserProfileLink = () => {
+const UserProfileLink = ({ className }: { className?: string }) => {
   return (
     <Link
-      href="#"
-      className="absolute top-4 right-4 flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full border border-green-600"
+      onClick={() => {
+        localStorage.removeItem("token");
+      }}
+      href="/auth"
+      className={cn(`relative flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-red-800`, className)}
     >
-      <IconUser className="size-8 text-green-500" />
+      <IconPower className="size-6 text-red-600" />
     </Link>
   );
 };

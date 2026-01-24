@@ -1,5 +1,8 @@
 "use client";
+import { loginUser, registerUser } from "@/lib/auth.api";
 import { createTodo, deleteTodo, getTodos, toggleTodo } from "@/lib/todos.api";
+import { getUserData } from "@/lib/user.api";
+import { useRouter, usePathname } from "next/navigation";
 import React, { createContext, useEffect, useState } from "react";
 
 export type Todo = {
@@ -18,15 +21,30 @@ type TodoContextType = {
   toggleTodoById: (id: number) => void;
   completedTasks: number;
   incompleteTasks: number;
+  handleRegister: (data: {
+    name: string,
+    email: string,
+    password: string,
+  }) => void;
+  handleLogin: (data: {
+    email: string,
+    password: string,
+  }) => void;
+  name: string,
+  email: string,
 };
 
 export const TodoContext = createContext<TodoContextType>({
   todoList: [],
-  addTodo: () => {},
-  deleteTodoById: () => {},
-  toggleTodoById: () => {},
+  addTodo: () => { },
+  deleteTodoById: () => { },
+  toggleTodoById: () => { },
   completedTasks: 0,
   incompleteTasks: 0,
+  handleRegister: () => { },
+  handleLogin: () => { },
+  name: "",
+  email: "",
 });
 
 const TodoContextProvider = ({ children }: { children: React.ReactNode }) => {
@@ -35,6 +53,48 @@ const TodoContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
   const [completedTasks, setCompletedTasks] = useState<number>(0);
   const [incompleteTasks, setIncompleteTasks] = useState<number>(0);
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const router = useRouter();
+  const pathname = usePathname();
+
+  async function handleRegister(data: {
+    name: string,
+    email: string,
+    password: string,
+  }) {
+    try {
+      const res = await registerUser(data);
+      localStorage.setItem("token", res.token);
+      router.push("/");
+    } catch (error: any) {
+      setError(error.message);
+    }
+  };
+
+  async function handleLogin(data: {
+    email: string,
+    password: string,
+  }) {
+    try {
+      const res = await loginUser(data);
+      localStorage.setItem("token", res.token);
+      router.push("/");
+    } catch (error: any) {
+      setError(error.message);
+    }
+  };
+
+  async function getUser() {
+    try {
+      const res = await getUserData();
+      const user = res.data;
+      setName(user.name);
+      setEmail(user.email);
+    } catch (error: any) {
+      setError(error.message);
+    }
+  };
 
   async function refreshTodos() {
     try {
@@ -58,7 +118,7 @@ const TodoContextProvider = ({ children }: { children: React.ReactNode }) => {
   function getStats(todos: Todo[]) {
     let complete = 0, incomplete = 0;
     todos.forEach(todo => {
-      if(todo.completed) {
+      if (todo.completed) {
         complete++;
       } else {
         incomplete++;
@@ -112,10 +172,14 @@ const TodoContextProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    refreshTodos();
-  }, []);
+    // Don't fetch todos on auth page
+    if (pathname !== "/auth") {
+      getUser();
+      refreshTodos();
+    }
+  }, [pathname]);
 
-  const value: TodoContextType = { todoList, addTodo, deleteTodoById, toggleTodoById, completedTasks, incompleteTasks };
+  const value: TodoContextType = { todoList, addTodo, deleteTodoById, toggleTodoById, completedTasks, incompleteTasks, handleLogin, handleRegister, name, email };
 
   return <TodoContext.Provider value={value}>{children}</TodoContext.Provider>;
 };
