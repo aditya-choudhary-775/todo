@@ -1,7 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 const todoRoutes = require("./routes/todo.routes");
+const authRoutes = require("./routes/auth.routes");
+const userRoutes = require("./routes/user.routes");
 const errorMiddleware = require("./middlewares/error.middleware");
+const auth = require("./middlewares/auth.middleware");
 
 const app = express();
 
@@ -27,9 +30,10 @@ app.use(cors({
 
 app.use(express.json());
 
+app.use("/", authRoutes);
+app.use(auth)
+app.use("/", userRoutes);
 app.use("/todos", todoRoutes);
-
-// error middleware MUST be last
 app.use(errorMiddleware);
 
 module.exports = app;

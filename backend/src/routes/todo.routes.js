@@ -4,7 +4,7 @@ const {
   createTodo,
   toggleTodo,
   deleteTodo,
-} = require("../controllers/todo.controllers.js");
+} = require("../controllers/todo.controller.js");
 
 const router = express.Router();
 
