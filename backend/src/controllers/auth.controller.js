@@ -1,19 +1,20 @@
 const prisma = require("../prisma");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 const { signToken } = require("../utils/jwt");
 
 exports.register = async (req, res, next) => {
   try {
     console.log("Register endpoint called");
     console.log("Request body:", req.body);
-    
+
     const { name, email, password } = req.body;
 
     // Validate input
     if (!name || !email || !password) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Name, email, and password are required" 
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, and password are required"
       });
     }
 
@@ -35,8 +36,8 @@ exports.register = async (req, res, next) => {
       }
     });
 
-    if(ogEmail) {
-      return res.status(409).json({success: false, message: "Email already exists"});
+    if (ogEmail) {
+      return res.status(409).json({ success: false, message: "Email already exists" });
     }
 
     console.log("Hashing password...");
@@ -52,12 +53,14 @@ exports.register = async (req, res, next) => {
     });
 
     console.log("User created, generating token...");
-    const token = signToken({
+    const accessToken = signToken({
       userId: user.id,
     });
 
+    const refreshToken = crypto.randomBytes(40).toString("hex");
+
     console.log("Registration successful");
-    res.json({ success: true, token });
+    res.json({ success: true, accessToken, refreshToken });
   } catch (error) {
     console.error("Error in register:", error);
     next(error);
@@ -77,6 +80,7 @@ exports.login = async (req, res, next) => {
         email,
       }
     });
+
     if (!user) {
       return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
@@ -86,11 +90,74 @@ exports.login = async (req, res, next) => {
       return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
-    const token = signToken({
+    const accessToken = signToken({
       userId: user.id,
     });
 
-    res.json({ success: true, token });
+    const refreshToken = crypto.randomBytes(40).toString("hex");
+
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id,
+        expiresAt: new Date(
+          Date.now() + 7 * 24 * 60 * 60 * 1000
+        ),
+      },
+    });
+
+    res.json({ success: true, accessToken, refreshToken });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.refresh = async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(401).json({ success: false, message: "Refresh token required" });
+    }
+
+    const storedToken = await prisma.refreshToken.findUnique({
+      where: { token: refreshToken },
+      include: { user: true },
+    });
+
+    if (!storedToken) {
+      return res.status(401).json({ success: false, message: "Invalid refresh token" });
+    }
+
+    if (storedToken.expiresAt < new Date()) {
+      return res.status(401).json({ success: false, message: "Refresh token expired" });
+    }
+
+    const accessToken = signToken({
+      userId: storedToken.user.id,
+    });
+
+    res.json({ success: true, accessToken });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.logout = async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if(!refreshToken) {
+      res.status(400).json({success: false, message: "Refresh token required"});
+    }
+
+    await prisma.refreshToken.deleteMany({
+      where: {
+        token: refreshToken
+      }
+    });
+
+    res.status(204).json({success: true, message: "Logged out successfully"});
   } catch (error) {
     next(error);
   }

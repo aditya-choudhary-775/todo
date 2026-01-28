@@ -64,8 +64,7 @@ const TodoContextProvider = ({ children }: { children: React.ReactNode }) => {
     password: string,
   }) {
     try {
-      const res = await registerUser(data);
-      localStorage.setItem("token", res.token);
+      await registerUser(data);
       router.push("/");
     } catch (error: any) {
       setError(error.message);
@@ -77,8 +76,7 @@ const TodoContextProvider = ({ children }: { children: React.ReactNode }) => {
     password: string,
   }) {
     try {
-      const res = await loginUser(data);
-      localStorage.setItem("token", res.token);
+      await loginUser(data);
       router.push("/");
     } catch (error: any) {
       setError(error.message);

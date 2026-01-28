@@ -7,9 +7,9 @@ export default function useRequireAuth() {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const accessToken = localStorage.getItem("accessToken");
 
-    if(!token) {
+    if(!accessToken) {
       router.replace("/auth")
     }
   }, []);

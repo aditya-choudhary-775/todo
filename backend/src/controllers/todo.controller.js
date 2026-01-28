@@ -66,7 +66,7 @@ exports.deleteTodo = async (req, res, next) => {
 
     await prisma.todo.delete({ where: { id, userId } });
 
-    res.status(204).json({success: true, message: "Deleted successfully"});
+    res.status(204).send();
   } catch (err) {
     next(err);
   }

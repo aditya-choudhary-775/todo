@@ -10,7 +10,7 @@ export type Todo = {
 };
 
 export async function getTodos() {
-  return apiFetch("/todos");
+  return apiFetch("/api/todos");
 };
 
 export async function createTodo(data: {
@@ -18,7 +18,7 @@ export async function createTodo(data: {
   description?: string;
   dueDate?: string | null;
 }) {
-  return apiFetch("/todos", {
+  return apiFetch("/api/todos", {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -29,20 +29,20 @@ export async function updateTodo(id: number, data: {
   description?: string;
   dueDate?: string | null;
 }) {
-  return apiFetch(`/todos/${id}`, {
+  return apiFetch(`/api/todos/${id}`, {
     method: "PUT",
     body: JSON.stringify(data),
   });
 };
 
 export async function toggleTodo(id: number) {
-  return apiFetch(`/todos/${id}/toggle`, {
+  return apiFetch(`/api/todos/${id}/toggle`, {
     method: "PATCH",
   });
 };
 
 export async function deleteTodo(id: number) {
-  return apiFetch(`/todos/${id}`, {
+  return apiFetch(`/api/todos/${id}`, {
     method: "DELETE",
   });
 };

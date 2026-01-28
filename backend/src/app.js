@@ -30,10 +30,10 @@ app.use(cors({
 
 app.use(express.json());
 
-app.use("/", authRoutes);
-app.use(auth)
-app.use("/", userRoutes);
-app.use("/todos", todoRoutes);
+app.use("/api", authRoutes);
+app.use(auth);
+app.use("/api/user", userRoutes);
+app.use("/api/todos", todoRoutes);
 app.use(errorMiddleware);
 
 module.exports = app;

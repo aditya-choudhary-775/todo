@@ -1,5 +1,10 @@
 import { apiFetch } from "./api";
 
 export async function getUserData() {
-  return apiFetch("/user");
+  try{
+    const res = await apiFetch("/api/user");
+    return res;
+  }catch(error){
+    throw error;
+  }
 };
